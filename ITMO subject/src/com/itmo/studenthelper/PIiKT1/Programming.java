@@ -24,7 +24,7 @@ public class Programming extends JFrame {
         JButton lab1 = new JButton("Лабораторная работа 1");
         JButton lab2 = new JButton("Лабораторная работа 2");
         JButton lab3 = new JButton("Лабораторная работа 3-4");
-        JButton lab5 = new JButton("ЛР5");
+        JButton lab5 = new JButton("<<Лабораторная работа 5>>");
         JButton lab6 = new JButton("ЛР6");
         JButton lab7 = new JButton("ЛР7");
         JButton test = new JButton("Test");
