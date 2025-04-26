@@ -1,12 +1,14 @@
 package com.itmo.studenthelper;
 
 import com.itmo.studenthelper.INF.INFPIiKT;
-import com.itmo.studenthelper.PIiKT1.Programming;
+import com.itmo.studenthelper.PIiKT1.*;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.sql.SQLException;
 
 public class StudentHelperApplication {
     public static void main(String[] args) {
@@ -20,6 +22,17 @@ class FirstFrame extends JFrame {
         setSize(720, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
+
+        /*try {
+            DatabaseManager.init();
+        } catch(SQLException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null,
+                    "Не удалось инициализировать БД:\n" + ex.getMessage(),
+                    "Ошибка", JOptionPane.ERROR_MESSAGE);
+            System.exit(1);
+        }
+        */
 
         JButton openSecondFrame = new JButton("Войти");
         openSecondFrame.setPreferredSize(new Dimension(100, 30));
@@ -38,7 +51,9 @@ class FirstFrame extends JFrame {
     }
 }
 
-// Окно ввода пароля
+
+
+
 class SecondFrame extends JFrame {
     public SecondFrame() {
         setTitle("Введите пароль");
@@ -61,14 +76,32 @@ class SecondFrame extends JFrame {
 
         submitButton.addActionListener(e -> {
 
-            //String write = login.getText();
-            //String input = textField.getText();
-            //if ("467478".equals(write) && "1234".equals(input)) {
-                new UserFrame(); // Открываем пользовательское окно
+            String write = login.getText();
+            String input = textField.getText();
+
+
+            boolean ok = false;
+            AccessManager.Role role = AccessManager.Role.STUDENT;   // дефолт
+
+            if ("root".equals(write) && "1234".equals(input)) {
+                role = AccessManager.Role.MASTER;    // главный редактор
+                ok   = true;
+            } else if ("teacher".equals(write) && "4321".equals(input)) {
+                role = AccessManager.Role.TEACHER;   // преподаватель
+                ok   = true;
+            } else if ("student".equals(write) && "1111".equals(input)) {
+                role = AccessManager.Role.STUDENT;   // студент
+                ok   = true;
+            }
+
+
+            if (ok) {
+                AccessManager.loginAs(role);
+                new UserFrame();
                 dispose();
-            //} else {
-              //  errorLabel.setText("Неверный пароль!");
-            //}
+            } else {
+                errorLabel.setText("Неверный логин или пароль!");
+            }
         });
 
         panel.add(isu);
@@ -83,7 +116,7 @@ class SecondFrame extends JFrame {
     }
 }
 
-// Четвертое окно (дополнительное)
+
 class ExtraFramePIn extends JFrame {
     public ExtraFramePIn() {
         setTitle("Дополнительное окно");
@@ -121,9 +154,60 @@ class ExtraFramePIiKT extends JFrame {
         JButton Programming = new JButton("Программирование");
         JButton INFPIiKT = new JButton("Информатика");
         JButton ButtonINF = new JButton("Информатика");
-        JButton ButtonDataBase = new JButton("База данных");
-        JButton ButtonOPJ = new JButton("Основы профессиональной деятельности");
+        JButton DataBase = new JButton("Базы данных");
+        JButton OPJ = new JButton("Основы профессиональной деятельности");
         JButton backButton = new JButton("Назад в окно пользователя");
+
+
+        JButton[] buttons = { Programming, INFPIiKT, DataBase, OPJ};
+
+
+        Programming.addActionListener(e -> { new Programming(); dispose(); });
+        INFPIiKT.addActionListener(e -> { new INFPIiKT(); dispose(); });
+        //DataBase  .addActionListener(e -> { new DataBase();  dispose(); });
+        //OPJ  .addActionListener(e -> { new OPJ();  dispose(); });
+
+
+
+        JPanel top = new JPanel(new BorderLayout());
+        //JButton backButton = new JButton("< Назад");
+        backButton.addActionListener(e -> {
+            new UserFrame();
+            dispose();
+        });
+        JLabel title = new JLabel("Дисциплины КСиТ", SwingConstants.CENTER);
+        title.setFont(new Font("Arial", Font.PLAIN, 24));
+        top.add(backButton, BorderLayout.WEST);
+        top.add(title,      BorderLayout.CENTER);
+
+
+        JPanel table = new JPanel(new GridLayout(0, 2, 8, 8));
+        table.setBorder(BorderFactory.createEmptyBorder(12,12,12,12));
+
+
+        for (JButton btn : buttons) {
+            table.add(btn);
+            JTextField comment = new JTextField();
+            comment.setEnabled(AccessManager.canComment());
+            table.add(comment);
+        }
+
+
+        setLayout(new BorderLayout());
+        add(top,    BorderLayout.NORTH);
+        add(new JScrollPane(table), BorderLayout.CENTER);
+
+        setVisible(true);
+    }
+
+        /*JButton point1 = new JButton("Программирование");
+        JButton point2 = new JButton("Информатика");
+        JButton lab1   = new JButton("Базы данных");
+        JButton lab2   = new JButton("Основы профессиональной деятельности");
+        JButton lab3   = new JButton("Web-программирование");
+        JButton lab5   = new JButton("Языки программирования");
+        JButton lab6   = new JButton("Основы программной инженерии");
+
 
         Programming.addActionListener(e -> {
             new Programming();
@@ -169,6 +253,9 @@ class ExtraFramePIiKT extends JFrame {
         panel.add(backButton);
         add(panel);
 
-        setVisible(true);
-    }
+        setVisible(true);*/
+
+
+
+
 }
