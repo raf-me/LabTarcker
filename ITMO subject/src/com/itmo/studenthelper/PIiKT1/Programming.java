@@ -1,8 +1,10 @@
 package com.itmo.studenthelper.PIiKT1;
 //import com.itmo.studenthelper.main.proga3-4VT;
+import com.itmo.studenthelper.AccessManager;
 import com.itmo.studenthelper.UserFrame;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -15,78 +17,252 @@ import static javax.swing.SwingConstants.TOP;
 
 public class Programming extends JFrame {
     public Programming() {
-        setTitle("ФПИиКТ");
+        setTitle("Программирование 1 курс");
         setSize(720, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        JLabel label = new JLabel("Программирование 1 курс");
-        JButton lab1 = new JButton("Лабораторная работа 1");
-        JButton lab2 = new JButton("Лабораторная работа 2");
-        JButton lab3 = new JButton("Лабораторная работа 3-4");
-        JButton lab5 = new JButton("<<Лабораторная работа 5>>");
-        JButton lab6 = new JButton("ЛР6");
-        JButton lab7 = new JButton("ЛР7");
-        JButton test = new JButton("Test");
-        JButton backButton = new JButton("<");
+
+        JButton point1 = new JButton("Баллы 1 семестр");
+        JButton point2 = new JButton("Баллы 2 семестр");
+        JButton lab1   = new JButton("Лабораторная работа 1");
+        JButton lab2   = new JButton("Лабораторная работа 2");
+        JButton lab3   = new JButton("Лабораторная работа 3-4");
+        JButton lab5   = new JButton("Лабораторная работа 5");
+        JButton lab6   = new JButton("Лабораторная работа 6");
+        JButton lab7   = new JButton("Лабораторная работа 7");
+        JButton lab8   = new JButton("Лабораторная работа 8");
 
 
-        // Возвращение в UserFrame
-        lab1.addActionListener(e -> {
-            new lab1();
+        JButton[] buttons = { point1, point2, lab1, lab2, lab3, lab5, lab6, lab7, lab8 };
+
+        point1.addActionListener(e -> { new point1(); dispose(); });
+        point2.addActionListener(e -> { new point2(); dispose(); });
+        lab1  .addActionListener(e -> { new lab1();  dispose(); });
+        lab2  .addActionListener(e -> { new lab2();  dispose(); });
+        lab3  .addActionListener(e -> {
+            try { new lab3(); } catch(IOException ex){throw new RuntimeException(ex);}
             dispose();
         });
+        lab5  .addActionListener(e -> { new lab5();  dispose(); });
+        lab6  .addActionListener(e -> { new lab6();  dispose(); });
+        lab7  .addActionListener(e -> { new lab7();  dispose(); });
+        lab8.addActionListener(e-> {new lab8(); dispose();});
 
-        lab2.addActionListener(e -> {
-            new lab2();
-            dispose();
-        });
 
-        lab3.addActionListener(e -> {
-            try {
-                new lab3();
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-            dispose();
-        });
-
+        JPanel top = new JPanel(new BorderLayout());
+        JButton backButton = new JButton("< Назад");
         backButton.addActionListener(e -> {
             new UserFrame();
             dispose();
         });
-        
-        lab5.addActionListener(e -> {
-            new lab5();
-            dispose();
-        });
+        JLabel title = new JLabel("Программирование 1 курс", SwingConstants.CENTER);
+        title.setFont(new Font("Arial", Font.PLAIN, 24));
+        top.add(backButton, BorderLayout.WEST);
+        top.add(title,      BorderLayout.CENTER);
 
-        lab6.addActionListener(e -> {
-            new lab6();
-            dispose();
-        });
 
-        lab7.addActionListener(e -> {
-            new lab7();
-            dispose();
-        });
+        JPanel table = new JPanel(new GridLayout(0, 2, 8, 8));
+        table.setBorder(BorderFactory.createEmptyBorder(12,12,12,12));
 
-        JPanel panel = new JPanel();
-        panel.add(backButton);
-        panel.add(label);
-        panel.add(label);
-        panel.add(lab1);
-        panel.add(lab2);
-        panel.add(lab3);
-        panel.add(lab5);
-        panel.add(lab6);
-        panel.add(lab7);
-        panel.add(test);
-        add(panel);
-        label.setFont(new Font("Arial", Font.PLAIN, 25));
-        backButton.setFont(new Font("Arial", Font.PLAIN, 25));
+
+        for (JButton btn : buttons) {
+            table.add(btn);
+            JTextField comment = new JTextField();
+            comment.setEnabled(AccessManager.canComment());
+            table.add(comment);
+        }
+
+        // Собираем всё вместе
+        setLayout(new BorderLayout());
+        add(top,    BorderLayout.NORTH);
+        add(new JScrollPane(table), BorderLayout.CENTER);
+
         setVisible(true);
     }
+}
+
+
+class point1 extends JFrame{
+    private static final String SAVE_FILE = "marksProgPiikt1.ser";
+    private final DefaultTableModel model;
+
+    public point1() {
+        super("Таблица баллов");
+        setSize(600, 390);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        setLayout(new BorderLayout());
+
+
+        JPanel top = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JButton backButton = new JButton("<");
+        backButton.addActionListener(e -> {
+            new Programming();
+            dispose();
+        });
+        top.add(backButton);
+        add(top, BorderLayout.NORTH);
+
+
+        String[] cols = {"Критерий", "Балл"};
+        Object[][] data = {
+                {"Лабораторная работа 1-2 (12-20)", ""},
+                {"Лабораторная работа 3-4 (24-40)", ""},
+                {"Рубеж (12-20)",                   ""},
+                {"Личные качества (0-3)",           ""},
+                {"Зачёт (0-20)",                    ""},
+                {"Сумма (0-103)",                   ""},
+                {"Итог",                            ""},
+        };
+        model = new DefaultTableModel(data, cols) {
+
+            @Override
+            public boolean isCellEditable(int row, int col) {
+                if (col == 0) return false;
+
+                return AccessManager.canSave();
+            }
+        };
+
+        JTable table = new JTable(model);
+        table.setRowHeight(24);
+        table.getTableHeader().setReorderingAllowed(false);
+        add(new JScrollPane(table), BorderLayout.CENTER);
+
+
+        if (AccessManager.canSave()) {
+            JPanel bottom = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+            JButton saveButton = new JButton("Сохранить");
+            saveButton.addActionListener(e -> saveData());
+            bottom.add(saveButton);
+            add(bottom, BorderLayout.SOUTH);
+        }
+
+        loadData();
+
+        setVisible(true);
+    }
+
+    /** Сохраняем информацию в файл marksProgPiikt1.ser */
+    private void saveData() {
+        HashMap<Integer, String> map = new HashMap<>();
+        for (int r = 0; r < model.getRowCount(); r++) {
+            map.put(r, String.valueOf(model.getValueAt(r, 1)));
+        }
+        try (ObjectOutputStream out =
+                     new ObjectOutputStream(new FileOutputStream(SAVE_FILE))) {
+            out.writeObject(map);
+            JOptionPane.showMessageDialog(this, "Данные сохранены");
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+
+    @SuppressWarnings("unchecked")
+    private void loadData() {
+        try (ObjectInputStream in =
+                     new ObjectInputStream(new FileInputStream(SAVE_FILE))) {
+            HashMap<Integer, String> map = (HashMap<Integer, String>) in.readObject();
+            for (int r = 0; r < model.getRowCount(); r++) {
+                String val = map.getOrDefault(r, String.valueOf(model.getValueAt(r, 1)));
+                model.setValueAt(val, r, 1);
+            }
+        } catch (Exception ignored) {}
+    }
+
+}
+
+class point2 extends JFrame{
+    private static final String SAVE_FILE = "marksProgPiikt2.ser";
+    private final DefaultTableModel model;
+
+    public point2() {
+        super("Таблица баллов");
+        setSize(600, 390);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        setLayout(new BorderLayout());
+
+
+        JPanel top = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JButton backButton = new JButton("<");
+        backButton.addActionListener(e -> {
+            new Programming();
+            dispose();
+        });
+        top.add(backButton);
+        add(top, BorderLayout.NORTH);
+
+
+        String[] cols = {"Критерий", "Балл"};
+        Object[][] data = {
+                {"Лабораторная работа 5-6 (24-40)", ""},
+                {"Лабораторная работа 7-8 (12-20)", ""},
+                {"Рубеж (12-20)",                   ""},
+                {"Личные качества (0-3)",           ""},
+                {"Экзамен (12-20)",                 ""},
+                {"Сумма (0-103)",                   ""},
+                {"Итог",                            ""},
+        };
+        model = new DefaultTableModel(data, cols) {
+
+            @Override
+            public boolean isCellEditable(int row, int col) {
+                if (col == 0) return false;
+                return AccessManager.canSave();
+            }
+        };
+
+        JTable table = new JTable(model);
+        table.setRowHeight(24);
+        table.getTableHeader().setReorderingAllowed(false);
+        add(new JScrollPane(table), BorderLayout.CENTER);
+
+
+        if (AccessManager.canSave()) {
+            JPanel bottom = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+            JButton saveButton = new JButton("Сохранить");
+            saveButton.addActionListener(e -> saveData());
+            bottom.add(saveButton);
+            add(bottom, BorderLayout.SOUTH);
+        }
+
+
+        loadData();
+
+        setVisible(true);
+    }
+
+    /** Сохраняем балл и оценку каждой строки в файл marksProgPiikt2.ser */
+    private void saveData() {
+        HashMap<Integer, String> map = new HashMap<>();
+        for (int r = 0; r < model.getRowCount(); r++) {
+            map.put(r, String.valueOf(model.getValueAt(r, 1)));
+        }
+        try (ObjectOutputStream out =
+                     new ObjectOutputStream(new FileOutputStream(SAVE_FILE))) {
+            out.writeObject(map);
+            JOptionPane.showMessageDialog(this, "Данные сохранены");
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+
+    @SuppressWarnings("unchecked")
+    private void loadData() {
+        try (ObjectInputStream in =
+                     new ObjectInputStream(new FileInputStream(SAVE_FILE))) {
+            HashMap<Integer, String> map = (HashMap<Integer, String>) in.readObject();
+            for (int r = 0; r < model.getRowCount(); r++) {
+                String val = map.getOrDefault(r, String.valueOf(model.getValueAt(r, 1)));
+                model.setValueAt(val, r, 1);
+            }
+        } catch (Exception ignored) {  }
+    }
+
 }
 
 class lab1 extends JFrame {
@@ -172,6 +348,8 @@ class lab3 extends JFrame {
         JTextArea enter4 = new JTextArea("\n");
         JButton backButton = new JButton("Назад в окно пользователя");
         JLabel pdf = new JLabel("Лабораторная работа 3-4:");
+
+
 
         label.setFont(new Font("Arial", Font.PLAIN, 25));
         task1.setFont(new Font("Arial", Font.PLAIN, 17));
@@ -262,6 +440,7 @@ class lab5 extends JFrame {
 
         JTextArea instructionArea = new JTextArea(
                 "Ваш вариант выдан практиком или лектором. В случае, если выдача работы не подразумевает сдачу предыдущей, эта ячейка может быть пустой.\n" +
+                "Вариант: (Ячейка для ввода значения, оно должно сохраняться при выходе из программы)\n" +
                 "Лабораторная работа находится в PDF-файле (Для кафедры ВТ: Варианты лабораторных работ находятся на se.ifmo).\n\n" +
                         "Обязательно:\n" +
                         "1. Внимательно ознакомьтесь с требованиями работы.\n" +
@@ -273,6 +452,8 @@ class lab5 extends JFrame {
                         "6. Получить итоговый балл и прикрепить отчёт.\n" +
                 "Удачи!"
         );
+
+
 
         instructionArea.setPreferredSize(new Dimension(410, 430));
 
@@ -371,6 +552,22 @@ class lab5 extends JFrame {
         add(mainPanel, BorderLayout.CENTER);
         loadData();
         setVisible(true);
+
+        // 1. Поле Вариант ─ разрешить/запретить ввода
+        variantField.setEditable(AccessManager.canEditVariant());
+
+        // 2. Поле комментариев
+        commentArea.setEditable(AccessManager.canComment());
+
+        // 3. Поле балла
+        gradeField.setEditable(AccessManager.canSetGrade());
+
+        // 4. Кнопка прикрепить отчёт
+        attachButton.setEnabled(AccessManager.canAttachReport());
+
+        // 5. Кнопка Сохранить
+        saveButton.setEnabled(AccessManager.canSave());
+
     }
 
     private void saveData() {
@@ -394,7 +591,7 @@ class lab5 extends JFrame {
             gradeField.setText(data.getOrDefault("grade", ""));
             fileLabel.setText(new File(data.getOrDefault("filePath", "")).getName());
         } catch (IOException | ClassNotFoundException e) {
-            // Ignore if no saved data
+
         }
     }
 
@@ -441,6 +638,7 @@ class lab6 extends JFrame{
 
         JTextArea instructionArea = new JTextArea(
                 "Ваш вариант выдан практиком или лектором. В случае, если выдача работы не подразумевает сдачу предыдущей, эта ячейка может быть пустой.\n" +
+                "Вариант: (Ячейка для ввода значения, оно должно сохраняться при выходе из программы)\n" +
                 "Лабораторная работа находится в PDF-файле (Для кафедры ВТ: Варианты лабораторных работ находятся на se.ifmo).\n\n" +
                 "Обязательно:\n" +
                         "1. Внимательно ознакомьтесь с требованиями работы.\n" +
@@ -495,6 +693,37 @@ class lab7 extends JFrame {
         panel.add(task2);
         panel.add(task3);
 
+        add(panel);
+        label.setFont(new Font("Arial", Font.PLAIN, 20));
+        backButton.setFont(new Font("Arial", Font.PLAIN, 25));
+        setVisible(true);
+    }
+}
+
+class lab8 extends JFrame {
+    public lab8() {
+        setTitle("Программирование 1 курс");
+        setSize(720, 800);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+
+        JLabel label = new JLabel("Лабораторная работа 2");
+        JLabel task1 = new JLabel("Ваш вариант выдан практиком (или лектором)");
+        JLabel task2 = new JLabel("Лабораторная работа находится в PDF-файле");
+        JLabel task3 = new JLabel("(Для кафедры ВТ: Варианты лабораторных работ находятся на se.ifmo).");
+        JButton backButton = new JButton("Назад в окно пользователя");
+
+        backButton.addActionListener(e -> {
+            new Programming();
+            dispose();
+        });
+
+        JPanel panel = new JPanel();
+        panel.add(label);
+        panel.add(task1);
+        panel.add(task2);
+        panel.add(task3);
+        panel.add(backButton);
         add(panel);
         label.setFont(new Font("Arial", Font.PLAIN, 20));
         backButton.setFont(new Font("Arial", Font.PLAIN, 25));
