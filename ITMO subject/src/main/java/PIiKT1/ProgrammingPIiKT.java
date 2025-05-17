@@ -49,7 +49,7 @@ public class ProgrammingPIiKT extends JFrame {
                 new JButton("Хакатон 2")
         };
 
-        // Обработчики (можешь настроить по своему)
+        // Обработчики
         buttons[0].addActionListener(e -> { new pointprog1(); dispose(); });
         buttons[1].addActionListener(e -> { new point2(); dispose(); });
         buttons[2].addActionListener(e -> { new labprog1(); dispose(); });
@@ -93,7 +93,7 @@ public class ProgrammingPIiKT extends JFrame {
         addButton.setFont(new Font("Arial", Font.BOLD, 16));
         addButton.addActionListener(e -> showAddDialog(table));
         table.add(addButton);
-        table.add(new JLabel()); // пустая ячейка для выравнивания
+        table.add(new JLabel());
 
         // Оформление
         setLayout(new BorderLayout());
@@ -157,10 +157,10 @@ public class ProgrammingPIiKT extends JFrame {
                 return;
             }
 
-            // Определим номер следующей лабораторной (на основе уже сохранённых)
+        
             int labNumber = getNextLabNumber();
 
-            String labHtmlName = "proglab" + labNumber; // без .html
+            String labHtmlName = "proglab" + labNumber; 
             if (type.equals("Лабораторная")) {
                 try {
                     File dest = new File("ProgaLabNHTML/progalab" + labHtmlName + ".html");
@@ -173,7 +173,7 @@ public class ProgrammingPIiKT extends JFrame {
                 }
             }
 
-            // Добавим кнопку
+            
             String displayName = type + ": " + name;
             JButton newBtn = new JButton(displayName);
             newBtn.addActionListener(ev -> {
@@ -191,7 +191,7 @@ public class ProgrammingPIiKT extends JFrame {
             table.revalidate();
             table.repaint();
 
-            // Сохраняем как и раньше (если у тебя уже реализовано сохранение userTasks, можно добавить туда)
+            
             userTasks.add(new String[]{type, name, labHtmlName});
             saveUserTasks();
 
@@ -280,7 +280,7 @@ class pointprog1 extends JFrame{
         setVisible(true);
     }
 
-    /** Сохраняем информацию в файл marksProgPiikt1.ser */
+   
     private void saveData() {
         HashMap<Integer, String> map = new HashMap<>();
         for (int r = 0; r < model.getRowCount(); r++) {
@@ -371,7 +371,7 @@ class point2 extends JFrame{
         setVisible(true);
     }
 
-    /** Сохраняем балл и оценку каждой строки в файл marksProgPiikt2.ser */
+    
     private void saveData() {
         HashMap<Integer, String> map = new HashMap<>();
         for (int r = 0; r < model.getRowCount(); r++) {
@@ -449,10 +449,10 @@ class labprog2 extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
 
-        // Ensure reports directory exists
+       
         new File("reports").mkdirs();
 
-        // Load data
+        
         data = new Properties();
         try (FileInputStream fis = new FileInputStream(DATA_FILE)) {
             data.load(fis);
